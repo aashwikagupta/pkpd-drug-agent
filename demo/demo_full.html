@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PK/PD Drug Response Agent – Demo</title>
+<style>
+  @page { size: Letter; margin: 0.7in 0.8in; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: "Times New Roman", Times, serif; font-size: 11pt; line-height: 1.28; color: #000; }
+  h1, h2, h3 { font-weight: bold; margin: 0; }
+  .date { font-weight: bold; text-decoration: underline; font-size: 12pt; }
+  .who { font-weight: bold; margin-bottom: 14px; }
+  .title { font-size: 17pt; font-weight: bold; margin: 6px 0 4px; }
+  h2 { font-size: 12pt; text-decoration: underline; margin: 16px 0 6px; }
+  h3 { font-size: 12pt; margin: 12px 0 4px; }
+  ul { margin: 2px 0 4px; padding-left: 26px; list-style: none; }
+  ul li { position: relative; margin: 1px 0; }
+  ul li::before { content: "-"; position: absolute; left: -16px; }
+  ul ul { padding-left: 34px; }
+  b.k { font-weight: bold; }
+  a { color: #1155cc; text-decoration: underline; }
+  .page { page-break-after: always; }
+  .shot { width: 100%; border: 1px solid #cfcfcf; border-radius: 4px; margin: 6px 0 2px; display: block; }
+  .shot.tall { max-height: 7.6in; object-fit: contain; object-position: top left; }
+  .cap { font-size: 10pt; color: #444; margin: 0 0 8px; font-style: italic; }
+  table.t { border-collapse: collapse; width: 100%; font-size: 10.5pt; margin: 6px 0 10px; }
+  table.t th, table.t td { border: 1px solid #999; padding: 4px 6px; vertical-align: top; text-align: left; }
+  table.t th { background: #eee; }
+  .note { font-size: 10.5pt; color: #333; }
+
+  /* dark diagrams, same look as the 10/19 notes */
+  .dia { background: #1c1c1c; border-radius: 4px; padding: 24px 12px; margin: 8px 0 10px;
+         font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #fff; }
+  .row { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .box { border-radius: 7px; padding: 7px 8px; text-align: center; min-width: 84px; font-size: 10.5pt; line-height: 1.22; }
+  .box small { display: block; font-size: 8.5pt; opacity: .82; margin-top: 2px; }
+  .gray { background: #3a3a3a; border: 1px solid #5a5a5a; }
+  .purple { background: #3c3496; border: 1px solid #6e63e0; }
+  .green { background: #1d4d3c; border: 1px solid #3a8f6d; }
+  .rust { background: #6b2a17; border: 1px solid #b0502f; }
+  .teal { background: #18465a; border: 1px solid #3c8bab; }
+  .dash { background: transparent; border: 1px dashed #8a8a8a; }
+  .arrow { color: #bbb; font-size: 15pt; }
+  .vline { width: 1px; height: 22px; background: #8a8a8a; margin: 0 auto; }
+  .hline { height: 1px; background: #8a8a8a; margin: 0 9%; }
+  .ticks { display: flex; justify-content: space-around; margin: 0 9%; }
+  .ticks span { width: 1px; height: 16px; background: #8a8a8a; }
+  .legend { font-size: 8.5pt; color: #bbb; text-align: center; margin-top: 14px; }
+
+  pre.code { background: #1e1e1e; color: #d4d4d4; font-family: Menlo, Consolas, monospace; font-size: 8pt;
+             line-height: 1.32; padding: 12px 14px; border-radius: 4px; white-space: pre-wrap; margin: 6px 0 10px; }
+  .kw { color: #c586c0; } .fn { color: #dcdcaa; } .str { color: #ce9178; } .cm { color: #6a9955; } .num { color: #b5cea8; }
+  .formula { font-family: "Times New Roman", serif; font-style: italic; text-align: center; margin: 6px 0; font-size: 12pt; }
+  .two { display: flex; gap: 14px; } .two > div { flex: 1; }
+</style>
+</head>
+<body>
+
+<!-- ============================== PAGE 1 ============================== -->
+<div class="page">
+  <div class="date">11/16/2026</div>
+  <div class="who">Sarah &amp; Aashwika</div>
+  <div class="title">PK/PD Drug Response Agent: Demo</div>
+
+  <h2>Where we left off (10/19)</h2>
+  <ul>
+    <li>Prototype pulled gene–drug evidence from PubChem, PharmGKB, and Open Targets</li>
+    <li>Plan: “start with these DBs, then add PK/PD evidence for one selected drug later”</li>
+    <li>Known gaps: no PK/PD data, no ancestry info, no LLM step, PharmGKB access unchecked</li>
+  </ul>
+
+  <h2>What is new</h2>
+  <ul>
+    <li><b class="k">PK/PD layer added:</b> the agent now simulates drug concentration over time for a specific patient
+      <ul>
+        <li>Uses the PK factors from our notes: enzyme genotype → metabolizer phenotype, age, kidney/liver function,
+            drug–drug and drug–supplement interactions, dose, schedule, adherence</li>
+        <li>Flags unusual metabolism (e.g. “exposure 3.4× a typical adult”)</li>
+      </ul>
+    </li>
+    <li><b class="k">PD section added:</b> mechanism and targets, time to effect vs. time to steady state, adverse effects,
+        and the patient characteristics per drug class from the reference article</li>
+    <li><b class="k">8 psychiatric drugs</b> covering the classes from our notes:
+      <ul>
+        <li>Antidepressants (SSRIs): sertraline, escitalopram, citalopram, fluoxetine</li>
+        <li>Antipsychotic: aripiprazole · Mood stabilizer: lithium · Anti-anxiety: alprazolam · Stimulant: methylphenidate</li>
+      </ul>
+    </li>
+    <li><b class="k">Databases fixed and extended:</b> PharmGKB moved to ClinPGx (old API no longer works); PK-DB added as a 4th live source</li>
+    <li><b class="k">New front end</b> (Streamlit): patient profile sidebar + 6 tabs (Overview, PK simulation, PD &amp; response,
+        Live evidence, AI agent, Report)</li>
+    <li><b class="k">Optional AI step</b> (Claude): writes the narrative report and answers follow-up questions, but only explains
+        numbers the code already computed</li>
+  </ul>
+
+  <h2>Research questions → where the agent answers them</h2>
+  <table class="t">
+    <tr><th style="width:42%">Question (from 10/19)</th><th>How the agent answers it now</th></tr>
+    <tr><td>How does a drug get absorbed, distributed, metabolized, and eliminated?</td>
+        <td>Concentration-time curve, half-life, time to steady state, Cmax / Cmin / AUC vs. a typical adult; enzyme pathways; PK-DB studies</td></tr>
+    <tr><td>Which genetic variants affect the drug’s metabolism or response?</td>
+        <td>Metabolizer phenotype changes enzyme activity in the model; CPIC / FDA label guidance per phenotype; live ClinPGx + Open Targets annotations</td></tr>
+    <tr><td>What evidence exists for differences across demographic or ancestry groups?</td>
+        <td>Reported in the “Q3” section of the report; live sources rarely return ancestry per finding, so the agent flags this as a gap
+            (ancestry ≠ ethnicity)</td></tr>
+    <tr><td>What factors could explain different responses or durations of action?</td>
+        <td>“Clearance factors” chart: how much age, eGFR, liver function, co-medications, and adherence each change exposure</td></tr>
+  </table>
+
+
+</div>
+
+<!-- ============================== PAGE 2 ============================== -->
+<div class="page">
+  <h2>Workflow Diagram (updated)</h2>
+  <div class="dia">
+    <div class="row">
+      <div class="box gray">Input<small>Drug + patient profile</small></div><span class="arrow">→</span>
+      <div class="box purple">Retrieve<small>Public databases</small></div><span class="arrow">→</span>
+      <div class="box teal">Simulate<small>PK engine</small></div><span class="arrow">→</span>
+      <div class="box purple">Analyze<small>Flags, conflicts, gaps</small></div><span class="arrow">→</span>
+      <div class="box gray">Output<small>Report + AI + CSV</small></div>
+    </div>
+    <div style="text-align:center;color:#bbb;font-size:9pt;margin:10px 0 6px">↑ feed Retrieve (databases) and Simulate (curated library) ↑</div>
+    <div class="row" style="gap:8px">
+      <div class="box green">PubChem<small>Drug identity</small></div>
+      <div class="box green">ClinPGx<small>Gene–drug</small></div>
+      <div class="box green">Open Targets<small>Targets, PGx</small></div>
+      <div class="box green">PK-DB<small>PK studies (now live)</small></div>
+      <div class="box teal">PK/PD library<small>Curated parameters</small></div>
+    </div>
+    <div class="legend">green = live public database · teal = new PK/PD components · purple = agent steps</div>
+  </div>
+
+  <p>The agent takes a drug name <i>and a patient profile</i> and builds a report on how this person’s genetics, organ
+     function, and other medications may change their exposure to, and response from, that drug.</p>
+  <ul>
+    <li><b class="k">Input:</b> Pick a drug and fill in the patient profile in the sidebar (dose, schedule, adherence, age, sex,
+        weight, eGFR, liver function, metabolizer phenotype, co-medications/supplements, optional clinical context)</li>
+    <li><b class="k">Retrieve:</b> Same as before (PubChem identity, gene–drug evidence, targets), plus PK-DB studies.
+        PharmGKB is now queried through ClinPGx</li>
+    <li><b class="k">Simulate (new):</b> Patient-specific clearance → concentration-over-time curve, compared with a typical 70 kg
+        adult who is a normal metabolizer with full adherence</li>
+    <li><b class="k">Analyze:</b> Rule-based flags (unusual exposure, CPIC guidance, interactions, phenoconversion, toxicity,
+        older adult, renal function, adherence), plus the earlier source conflicts and gaps</li>
+    <li><b class="k">Output:</b> Dashboard + structured report organized by the research questions (markdown), evidence CSV,
+        concentration-time CSV, optional AI narrative/chat</li>
+  </ul>
+  <p><b class="k">Why PK-DB is only partly used:</b> PK-DB returns study metadata publicly, but the actual parameter values (AUC,
+     half-life) come back empty without an account, and none of the SSRIs are in it. So the simulator uses a curated
+     table of literature/label values, and PK-DB is shown as supporting evidence when the drug is covered (e.g. alprazolam:
+     1 study, 56 individuals, 549 PK outputs).</p>
+</div>
+
+<!-- ============================== PAGE 3 ============================== -->
+<div class="page">
+  <h2>Organizational Chart</h2>
+  <div class="dia">
+    <div class="row"><div class="box gray" style="min-width:150px">Research team<small>Sarah + Aashwika</small></div></div>
+    <div class="vline"></div>
+    <div class="row">
+      <div class="box purple" style="min-width:170px">Streamlit app<small>app.py · sidebar + 6 tabs</small></div>
+      <span class="arrow">←</span>
+      <div class="box purple" style="min-width:150px">Report + CSV + AI<small>agent.py · ai.py</small></div>
+    </div>
+    <div class="vline"></div>
+    <div class="row">
+      <div class="box purple">Pydantic models<small>models.py · pkpd.py</small></div><span class="arrow" style="color:#777">┄</span>
+      <div class="box purple" style="min-width:150px">Agent coordinator<small>agent.run() · simulate()</small></div><span class="arrow">→</span>
+      <div class="box purple">Analyze step<small>flags(), conflicts, gaps</small></div>
+    </div>
+    <div class="vline"></div>
+    <div class="hline"></div>
+    <div class="ticks"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="row" style="gap:8px">
+      <div class="box rust">PubChem<small>Drug identity</small></div>
+      <div class="box rust">ClinPGx<small>Gene–drug links</small></div>
+      <div class="box rust">Open Targets<small>Targets, variants</small></div>
+      <div class="box rust">PK-DB<small>PK studies</small></div>
+      <div class="box teal">pk_data.py<small>Curated PK/PD</small></div>
+    </div>
+  </div>
+
+  <h2>Code Explanation</h2>
+  <ul>
+    <li><b class="k">pk_data.py</b> (new): the curated PK/PD library
+      <ul>
+        <li>For each drug: half-life, Tmax, volume of distribution, fraction cleared by kidney, fraction cleared by each enzyme
+            (e.g. escitalopram: CYP2C19 65%, CYP3A4 25%), reference range, CPIC/label guidance per phenotype, mechanism,
+            targets, onset, adverse effects, and source citations</li>
+        <li>Interaction table: inhibitors/inducers (e.g. bupropion = strong CYP2D6 inhibitor, St. John’s wort = CYP3A4 inducer)
+            and drugs that reduce lithium clearance (NSAIDs, ACE inhibitors, ARBs, thiazides)</li>
+      </ul>
+    </li>
+    <li><b class="k">pkpd.py</b> (new): the PK engine
+      <ul>
+        <li><i>PatientProfile</i> holds everything in the sidebar</li>
+        <li><i>clearance()</i> combines genotype × co-medications into an activity for each enzyme, then adjusts for eGFR, liver, age, and weight</li>
+        <li><i>simulate()</i> builds the concentration curve for the patient and for a typical adult, then computes steady-state metrics</li>
+        <li><i>flags()</i> is the rule-based “reasoning” step that produces the critical / caution / note cards</li>
+      </ul>
+    </li>
+    <li><b class="k">agent.py:</b> still the coordinator (<i>run()</i> → sources → normalize → conflicts/gaps);
+        new <i>pkpd_markdown()</i> writes the full report organized by the 4 research questions</li>
+    <li><b class="k">sources.py:</b> PharmGKB URL → <i>api.clinpgx.org</i>; new <i>pkdb()</i> client</li>
+    <li><b class="k">ai.py</b> (new, optional): sends the computed report as context to Claude, which writes the narrative and
+        answers follow-ups. Instructed to only use numbers from the context and not to give clinical advice</li>
+    <li><b class="k">app.py:</b> the front end (next pages)</li>
+  </ul>
+</div>
+
+<!-- ============================== PAGE 4 ============================== -->
+<div class="page">
+  <h2>How the PK model works</h2>
+  <ul>
+    <li>One-compartment model with first-order oral absorption; each dose adds a curve and the curves are summed:</li>
+  </ul>
+  <div class="formula">C(t) = Σ<sub>doses</sub> D·k<sub>a</sub> / (V·(k<sub>a</sub> − k<sub>e</sub>)) · ( e<sup>−k<sub>e</sub>(t−t<sub>i</sub>)</sup> − e<sup>−k<sub>a</sub>(t−t<sub>i</sub>)</sup> )</div>
+  <ul>
+    <li>Clearance is split into pathways (kidney + each enzyme). Each pathway is scaled by the patient’s factors:</li>
+  </ul>
+  <div class="formula">CL<sub>patient</sub> = CL<sub>typical</sub> × [ f<sub>renal</sub>·(eGFR/100) + Σ f<sub>enzyme</sub>·activity<sub>enzyme</sub> + f<sub>other</sub> ] × liver × age × weight</div>
+  <ul>
+    <li><b class="k">activity = genotype × co-medications.</b> Example: CYP2D6 normal metabolizer (1.0) taking bupropion (×0.2)
+        → activity 0.2 → behaves like a poor metabolizer. This is called <i>phenoconversion</i>, and it is one reason
+        <b class="k">“genotype alone cannot predict the complete PK profile”</b> (from our 10/09 notes)</li>
+    <li>Exposure ratio = CL<sub>typical</sub> / CL<sub>patient</sub>; half-life = 0.693·V / CL; steady state ≈ 5 half-lives</li>
+    <li>Sanity check against literature (typical adult): sertraline 50 mg/day → ~28 ng/mL; escitalopram 10 mg → ~13 ng/mL;
+        aripiprazole 10 mg → ~112 ng/mL; lithium 900 mg/day → ~0.71 mmol/L, all in realistic ranges</li>
+  </ul>
+
+  <h3>Code: combining genotype and co-medications (pkpd.py)</h3>
+<pre class="code"><span class="cm"># pathway activity = genotype x co-medications</span>
+<span class="kw">for</span> path <span class="kw">in</span> fm:
+    a = PHENOTYPE_ACTIVITY.get(p.phenotypes.get(path, <span class="str">"Normal metabolizer (NM)"</span>), <span class="num">1.0</span>)
+    <span class="kw">for</span> m <span class="kw">in</span> p.comeds:
+        mult = INTERACTIONS.get(m, {}).get(path)
+        <span class="kw">if</span> mult <span class="kw">is not</span> <span class="kw">None</span>:
+            a *= mult
+    activity[path] = a
+    <span class="kw">if not</span> geno.startswith(<span class="str">"Poor"</span>) <span class="kw">and</span> a &lt;= <span class="num">0.25</span> <span class="kw">and</span> fm[path] &gt;= <span class="num">0.3</span>:
+        pheno.append(<span class="str">f"{path}: ... behaves like a poor metabolizer (phenoconversion)."</span>)
+
+nonrenal = <span class="fn">sum</span>(fm[k] * activity[k] <span class="kw">for</span> k <span class="kw">in</span> fm) + f_other
+total    = fe * renal + nonrenal * hep * age_fac
+cl_p     = cl_ref * w_fac * total / total_ref</pre>
+
+  <h3>Code: one of the flag rules (pkpd.py → flags())</h3>
+<pre class="code"><span class="kw">if</span> fold_cl &gt;= <span class="num">2</span>:
+    out.append(Flag(level=<span class="str">"critical"</span>, area=<span class="str">"PK"</span>,
+                    title=<span class="str">f"Predicted exposure ~{fold_cl:.1f}x a typical adult"</span>,
+                    detail=<span class="str">"... Unusual metabolism: consider a lower dose, slower titration, "</span>
+                           <span class="str">"or therapeutic drug monitoring."</span>))
+<span class="kw">for</span> gene, guide <span class="kw">in</span> d.get(<span class="str">"cpic"</span>, {}).items():      <span class="cm"># CPIC / label guidance</span>
+    ph = p.phenotypes.get(gene)
+    <span class="kw">if</span> ph <span class="kw">and</span> ph <span class="kw">in</span> guide:
+        out.append(Flag(level=<span class="str">"warning"</span>, area=<span class="str">"PGx"</span>, title=<span class="str">f"{gene} {ph}"</span>, detail=guide[ph]))</pre>
+</div>
+
+<!-- ============================== PAGE 5 ============================== -->
+<div class="page">
+  <h2>Demo: the app</h2>
+  <img class="shot" src="img/00_landing.png" style="max-height:4.2in;object-fit:contain;object-position:top left">
+  <p class="cap">Landing page (default: sertraline 50 mg daily, typical adult). The step bar mirrors the workflow diagram. The sidebar is the patient profile.</p>
+  <div class="two">
+    <div style="flex:0 0 26%"><img class="shot" src="img/01_sidebar.png" style="max-height:3.9in;object-fit:contain;object-position:top left"></div>
+    <div>
+      <ul>
+        <li><b class="k">Sidebar = “factors considered”</b> from the 10/09 notes:
+          <ul>
+            <li>Drug &amp; regimen: dose, doses/day, days to simulate, adherence</li>
+            <li>Patient: age, sex, weight</li>
+            <li>Organ function: eGFR, liver (Child-Pugh)</li>
+            <li>Genotype → metabolizer phenotype (only the genes that matter for the selected drug)</li>
+            <li>Other medications &amp; supplements</li>
+            <li>Clinical context (symptoms/goals, previous responses, preferences, class characteristics like sleep or weight); used by the AI</li>
+          </ul>
+        </li>
+        <li>Everything recalculates instantly when an input changes</li>
+        <li>With no genotype or co-medications, exposure = 1.00× and the only flag is “Exposure close to typical”</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== PAGE 6 ============================== -->
+<div class="page">
+  <h2>Case 1: Escitalopram, CYP2C19 poor metabolizer, age 70, 75% adherence</h2>
+  <img class="shot" src="img/10_overview_escitalopram.png">
+  <p class="cap">Overview tab. KPI tiles, flags (“What the agent found”), clearance factors, and a mini concentration curve.</p>
+  <ul>
+    <li>Exposure <b class="k">3.4×</b> a typical adult; half-life <b class="k">102 h vs 30 h</b>; steady state takes ~21 days instead of ~6</li>
+    <li>CPIC guidance surfaced automatically: consider a 50% lower starting dose or an alternative not metabolized by CYP2C19</li>
+    <li>Clearance factors: the CYP2C19 genotype is the biggest driver; age ≥ 65 adds to it</li>
+    <li>8 missed doses (orange triangles): long half-life buffers them, so levels dip but stay in range</li>
+  </ul>
+</div>
+
+<!-- ============================== PAGE 7 ============================== -->
+<div class="page">
+  <h2>Case 1 (cont.): PK simulation tab</h2>
+  <img class="shot tall" src="img/11_pk_escitalopram.png">
+  <p class="cap">Solid blue = this patient, dashed gray = typical adult. Shaded band = AGNP reference range (15–80 ng/mL). Hovering shows exact values.</p>
+  <ul>
+    <li>Steady-state table compares Cmax, trough, Cavg, AUC with the typical adult; model parameters show CL, V, half-life, absorption rate, accumulation</li>
+    <li>Concentration-time data can be downloaded as CSV for further modeling</li>
+  </ul>
+</div>
+
+<!-- ============================== PAGE 8 ============================== -->
+<div class="page">
+  <h2>Case 2: Aripiprazole + bupropion → phenoconversion</h2>
+  <img class="shot" src="img/20_overview_aripiprazole.png">
+  <ul>
+    <li>Genotype not entered (assumed normal metabolizer), but bupropion strongly inhibits CYP2D6</li>
+    <li>The agent flags <b class="k">phenoconversion</b>: CYP2D6 activity drops to ~20%, so the patient behaves like a poor metabolizer</li>
+    <li>Exposure 1.7×, average level 174 vs 112 ng/mL, still inside the 100–350 ng/mL reference range</li>
+    <li>Shows why genetic information should be combined with medication data (10/09 notes)</li>
+  </ul>
+</div>
+
+<!-- ============================== PAGE 9 ============================== -->
+<div class="page">
+  <h2>Case 3: Lithium, eGFR 45, taking ibuprofen</h2>
+  <img class="shot" src="img/31_overview_lithium.png">
+  <ul>
+    <li>Lithium is ~95% cleared by the kidney, so genotype doesn’t matter, but kidney function and NSAIDs do</li>
+    <li>Exposure <b class="k">2.7×</b>; average level <b class="k">1.76 mmol/L</b> (reference 0.6–1.2); only 13% of the last week in range</li>
+    <li>Two critical flags: high exposure and peak level above the 1.5 mmol/L toxicity alert</li>
+  </ul>
+</div>
+
+<!-- ============================== PAGE 10 ============================== -->
+<div class="page">
+  <h2>Case 3 (cont.): lithium accumulating above the reference range</h2>
+  <img class="shot tall" src="img/30_pk_lithium.png">
+  <p class="cap">The dashed typical-adult curve plateaus inside the range; this patient’s curve keeps climbing past it (half-life 65 h vs 24 h).</p>
+</div>
+
+<!-- ============================== PAGE 11 ============================== -->
+<div class="page">
+  <h2>PD &amp; response tab</h2>
+  <img class="shot" src="img/12_pd_escitalopram.png">
+  <ul>
+    <li>Mechanism and targets (SERT / <i>SLC6A4</i> for SSRIs; D2/5-HT for aripiprazole; GABA-A for alprazolam …)</li>
+    <li><b class="k">Exposure vs. effect timing:</b> PK steady state in days, but antidepressant effect in 4–8 weeks</li>
+    <li>Adverse effects to monitor; PD genetics (e.g. <i>SLC6A4</i>/<i>HTR2A</i> evidence is mixed and not clinically actionable)</li>
+    <li>Patient characteristics per drug class from the reference article (SSRIs: anxiety, sleep, weight changes)</li>
+    <li>PD is qualitative for now (no receptor-occupancy model yet)</li>
+  </ul>
+</div>
+
+<!-- ============================== PAGE 12 ============================== -->
+<div class="page">
+  <h2>Live evidence tab (sertraline)</h2>
+  <img class="shot" src="img/40_evidence_top.png" style="max-height:4.1in;object-fit:contain;object-position:top left">
+  <p class="cap">One click queries all 4 databases live. Status tiles show records per source; identifiers confirm the drug matches across sources.</p>
+  <ul>
+    <li>Sertraline: ClinPGx 22 clinical annotations (e.g. CYP2C19, level 1A), Open Targets 92 PGx annotations, PK-DB none</li>
+    <li>Sub-tabs: gene–drug annotations (filter by source), PK-DB studies, conflicts &amp; gaps, all evidence + CSV</li>
+  </ul>
+  <img class="shot" src="img/41_gaps_crop.png" style="margin-top:8px;max-height:2.5in;object-fit:contain;object-position:top left">
+  <p class="cap">Conflicts &amp; gaps: genes reported by only one source, and what remains uncertain (PK-DB coverage, missing ancestry data).</p>
+</div>
+
+<!-- ============================== PAGE 13 ============================== -->
+<div class="page">
+  <h2>Report tab + AI agent tab</h2>
+  <img class="shot tall" src="img/42_report_top.png" style="max-height:5.2in">
+  <p class="cap">Structured drug-response report (downloadable .md): patient profile, Q1–Q4, PD, flags, conflicts, uncertainty, sources.</p>
+  <img class="shot" src="img/13_ai_tab.png" style="margin-top:6px">
+  <p class="cap">AI agent tab. Without an API key it shows the rule-based summary; with a key, Claude writes the narrative and answers questions like “why is exposure higher?”</p>
+</div>
+
+<!-- ============================== PAGE 14 ============================== -->
+<div>
+  <h2>Roadblocks</h2>
+  <table class="t">
+    <tr><th>Source / step</th><th>What broke</th><th>What we did</th></tr>
+    <tr><td>PharmGKB</td><td><i>api.pharmgkb.org</i> no longer resolves</td><td>PharmGKB is now ClinPGx → switched to <i>api.clinpgx.org</i> (same endpoints, works)</td></tr>
+    <tr><td>PK-DB</td><td>Parameter values (AUC, t½) return 0 rows for anonymous users</td><td>Use study metadata only; simulator uses curated literature values</td></tr>
+    <tr><td>PK-DB coverage</td><td>No SSRIs, aripiprazole, lithium, methylphenidate</td><td>Covers alprazolam, diazepam, midazolam, bupropion</td></tr>
+    <tr><td>Ancestry data</td><td>Neither ClinPGx nor Open Targets returns ancestry per finding</td><td>Flagged as a gap; next: gnomAD allele frequencies via Open Targets</td></tr>
+  </table>
+
+  <h2>Limitations</h2>
+  <ul>
+    <li>Research prototype, not for clinical use</li>
+    <li>PK values are approximate literature/label values and need to be double-checked against the cited sources</li>
+    <li>Simple one-compartment model; active metabolites (norfluoxetine, dehydro-aripiprazole) not modeled</li>
+    <li>Interaction strengths are rounded categories (strong ≈ ×0.2, moderate ≈ ×0.5)</li>
+    <li>PD is descriptive, not quantitative</li>
+  </ul>
+
+  <h2>Next steps</h2>
+  <ul>
+    <li>Pick the one drug for the PK-DB deep dive (alprazolam is the only one of ours PK-DB covers)</li>
+    <li>Add ancestry allele frequencies for key variants (CYP2C19*2/*17, CYP2D6)</li>
+    <li>Fit model parameters to real PK-DB time-courses once we have access</li>
+    <li>Quantitative PD for one drug (e.g. receptor occupancy vs. concentration)</li>
+    <li>Deploy so the app has a shareable link (Streamlit Community Cloud)</li>
+  </ul>
+
+  <h2>Run it</h2>
+  <ul>
+    <li><span style="font-family:Menlo,monospace;font-size:10pt">pip install -r requirements.txt</span> →
+        <span style="font-family:Menlo,monospace;font-size:10pt">streamlit run app.py</span> → opens at
+        <span style="font-family:Menlo,monospace;font-size:10pt">http://localhost:8517</span></li>
+    <li>Works without an API key; the AI tab needs an Anthropic API key</li>
+  </ul>
+
+  <h2>Questions</h2>
+  <ul>
+    <li>Can we get a PK-DB account for parameter values?</li>
+    <li>Which drug should be the PK-DB focus: stay with an SSRI (no PK-DB data) or switch to alprazolam?</li>
+    <li>ClinPGx terms for programmatic use?</li>
+    <li>Should the AI step stay optional, or be part of the main pipeline?</li>
+  </ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+requests
+pandas
+pydantic>=2
+numpy
+streamlit>=1.40
+altair
+anthropic

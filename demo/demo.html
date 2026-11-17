@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PK/PD Drug Response Agent – App Screens</title>
+<style>
+  @page { size: Letter landscape; margin: 0.45in 0.5in; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #1a1a1a; margin: 0; }
+  .page { page-break-after: always; display: flex; gap: 18px; align-items: flex-start; height: 7.5in; }
+  .page:last-child { page-break-after: auto; }
+  .shots { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 100%; }
+  .shots img { border: 1px solid #d6d5d1; border-radius: 6px; max-width: 100%; max-height: 100%;
+               object-fit: contain; object-position: top left; min-height: 0; }
+  .shots.split img { max-height: 49%; }
+  .side { flex: 0 0 2.3in; border-left: 3px solid #2a78d6; padding: 2px 0 0 12px; font-size: 10.5pt; line-height: 1.38; }
+  .side h2 { font-size: 12.5pt; margin: 0 0 8px; }
+  .side ul { margin: 0; padding-left: 16px; }
+  .side li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="shots" style="flex-direction:row"><img src="img/00_landing.png" style="max-width:76%"><img src="img/01_sidebar.png" style="max-width:22%"></div>
+  <div class="side"><h2>The app</h2><ul>
+    <li>Pick a drug, then fill in the patient profile in the sidebar</li>
+    <li>Sidebar = factors from our notes: dose, adherence, age, kidney/liver, genotype, co-meds</li>
+    <li>Results update instantly</li></ul></div>
+</div>
+
+<div class="page">
+  <div class="shots"><img src="img/10_overview_escitalopram.png"></div>
+  <div class="side"><h2>Escitalopram · CYP2C19 PM, age 70</h2><ul>
+    <li>Exposure 3.4× a typical adult</li>
+    <li>Half-life 102 h vs 30 h</li>
+    <li>CPIC: consider a 50% lower starting dose</li>
+    <li>Orange triangles = missed doses</li></ul></div>
+</div>
+
+<div class="page">
+  <div class="shots"><img src="img/11_pk_escitalopram.png"></div>
+  <div class="side"><h2>PK simulation</h2><ul>
+    <li>Solid = this patient, dashed = typical adult</li>
+    <li>Shaded band = reference range</li>
+    <li>Steady-state metrics + model parameters below</li></ul></div>
+</div>
+
+<div class="page">
+  <div class="shots"><img src="img/20_overview_aripiprazole.png"></div>
+  <div class="side"><h2>Aripiprazole + bupropion</h2><ul>
+    <li>Normal genotype, but bupropion blocks CYP2D6</li>
+    <li>Agent flags phenoconversion: acts like a poor metabolizer</li>
+    <li>Exposure 1.7×</li></ul></div>
+</div>
+
+<div class="page">
+  <div class="shots"><img src="img/31_overview_lithium.png"></div>
+  <div class="side"><h2>Lithium · eGFR 45 + ibuprofen</h2><ul>
+    <li>Cleared by the kidney, so kidney function and NSAIDs drive exposure</li>
+    <li>Exposure 2.7×, level 1.76 mmol/L</li>
+    <li>Toxicity alerts triggered</li></ul></div>
+</div>
+
+<div class="page">
+  <div class="shots"><img src="img/30_pk_lithium.png"></div>
+  <div class="side"><h2>Lithium curve</h2><ul>
+    <li>Typical adult plateaus inside 0.6–1.2 mmol/L</li>
+    <li>This patient keeps climbing above it</li></ul></div>
+</div>
+
+<div class="page">
+  <div class="shots"><img src="img/12_pd_escitalopram.png"></div>
+  <div class="side"><h2>PD &amp; response</h2><ul>
+    <li>Mechanism and targets</li>
+    <li>Steady state in days vs. effect in 4–8 weeks</li>
+    <li>Adverse effects + class characteristics</li></ul></div>
+</div>
+
+<div class="page">
+  <div class="shots split"><img src="img/40_evidence_top.png"><img src="img/41_gaps_crop.png"></div>
+  <div class="side"><h2>Live evidence</h2><ul>
+    <li>One click queries PubChem, ClinPGx, Open Targets, PK-DB</li>
+    <li>Gene–drug annotations by source</li>
+    <li>Conflicts across sources + what's missing</li></ul></div>
+</div>
+
+<div class="page">
+  <div class="shots split"><img src="img/42_report_top.png"><img src="img/13_ai_tab.png"></div>
+  <div class="side"><h2>Report + AI agent</h2><ul>
+    <li>Report organized by the 4 research questions; downloadable</li>
+    <li>AI tab: Claude explains results when an API key is added</li></ul></div>
+</div>
+
+</body>
+</html>
